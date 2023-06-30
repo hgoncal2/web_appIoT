@@ -1,0 +1,68 @@
+<style type="text/css">
+	.row{
+    display: flex       
+}
+</style>
+
+<div style="width: 1000px; border: 1px solid red;">
+	<div style="width: 500px;" class="row">
+  <canvas style="margin-right: 40px;" id="myChart"></canvas>
+  <canvas style="margin-left: 40px;"  id="myChart2"></canvas>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('myChart');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4,','2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4,'],
+      datasets: [{
+        label: 'Graus Cº',
+        data: [12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 45],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      plugins: {
+    		legend: {
+    			display:false
+    		},
+    		subtitle: {
+    			display:true,
+    			text:" Temperatura"
+    		}
+    	}
+    }
+  });
+
+  const ctx2 = document.getElementById('myChart2');
+
+  new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: ['2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4,','2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4,'],
+      datasets: [{
+        label: 'Graus Cº',
+        data: [12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 45],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      plugins: {
+    		legend: {
+    			display:false
+    		},
+    		subtitle: {
+    			display:true,
+    			text:" Temperatura"
+    		}
+    	}
+    }
+  });
+</script>
+
+</div>
