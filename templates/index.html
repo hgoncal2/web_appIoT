@@ -2,39 +2,87 @@
 	.row{
     display: flex  ;     
 }
+.container {
+   position: absolute;
+   text-align: center;
+
+}
 
 
 </style>
 
-<div style="width: 1000px;" class="row">
-	<div style="width: 500px;">
-  <canvas style="margin-right: 40px;" id="myChart"></canvas>
+<div style="width: 1400px;" class="row">
+	<div style="width: 650px;">
+  <canvas style="" id="myChart"></canvas>
+
   </div>
 
-  <div style="width: 500px;">
-  <canvas style="margin-left: 40px;"  id="myChart2"></canvas>
+  <div style="width: 650px;">
+  <canvas style="" id="myChart2"></canvas>
 </div>
 </div>
+<div class="container" > 
+    <form >
+    <input type="submit" name="valor_graf_t" value="10" style="height: 28px;">
+    <input type="submit" name="valor_graf_t" value="50" style="height: 28px;">
+    <input type="submit" name="valor_graf_t" value="100" style="height: 28px;">
+    <input type="submit" name="valor_graf_t" value="Todos" style="height: 28px;">
+
+</form>
+</div>
+
 
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-  const ctx = document.getElementById('myChart');
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 
+<script>
+
+  const ctx = document.getElementById('myChart');
+  console.log("entrei")
   new Chart(ctx, {
-    type: 'bar',
+    type: 'line',
     data: {
-      labels: ['2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4,','2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4,'],
+      labels: {{data_d_t|tojson}},
       datasets: [{
-        label: 'Graus Cº',
-        data: [12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 45],
-        borderWidth: 1
+        label: 'Temperatura °C',
+        data: {{data_v_t}},
+        borderWidth: 1,
+       
+        borderColor: 'rgb(75, 192, 192)',
+        
+        
+
       }]
     },
     options: {
+       elements:{
+                point:{
+                    borderWidth: 0,
+                    radius: 0.5,
+                    backgroundColor: 'rgba(0,0,0,0)'
+                }
+            },
+      responsive: true,
       plugins: {
+        zoom: {
+          pan: {
+            enabled: true
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            pinch: {
+              enabled: true
+            },
+            mode: 'xy',
+          }
+      },
     		legend: {
     			display:false
     		},
@@ -42,33 +90,102 @@
     			display:true,
     			text:" Temperatura"
     		}
-    	}
-    }
+    	},
+      scales: {
+            y: {
+              type: 'linear',
+                suggestedMin: 0,
+                suggestedMax: 100,
+                ticks:{
+                  
+
+                }
+            },
+            x: {
+              display:true,
+              ticks: {
+                font: {
+                  size:10
+                }
+
+              },
+
+             
+              
+            },
+        },
+      }
   });
 
   const ctx2 = document.getElementById('myChart2');
 
   new Chart(ctx2, {
-    type: 'bar',
+    type: 'line',
     data: {
-      labels: ['2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4,','2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4', '2023-11-4,'],
+      labels: {{data_d_h|tojson}},
       datasets: [{
-        label: 'Graus Cº',
-        data: [12, 19, 3, 5, 2, 3,12, 19, 3, 5, 2, 45],
-        borderWidth: 1
+        label: ' Humidade °C',
+        data: {{data_v_h}},
+        borderWidth: 1,
+        borderColor: 'rgb(75, 192, 192)',
       }]
     },
-    options: {
+   options: {
+       elements:{
+                point:{
+                    borderWidth: 0,
+                    radius: 0.5,
+                    backgroundColor: 'rgba(0,0,0,0)'
+                }
+            },
+      responsive: true,
       plugins: {
-    		legend: {
-    			display:false
-    		},
-    		subtitle: {
-    			display:true,
-    			text:" Temperatura"
-    		}
-    	}
-    }
+        zoom: {
+          pan: {
+            enabled: true
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            pinch: {
+              enabled: true
+            },
+            mode: 'xy',
+          }
+      },
+        legend: {
+          display:false
+        },
+        subtitle: {
+          display:true,
+          text:" Humidade"
+        }
+      },
+      scales: {
+            y: {
+              type: 'linear',
+                suggestedMin: 0,
+                suggestedMax: 100,
+                ticks:{
+                  
+
+                }
+            },
+            x: {
+              display:true,
+              ticks: {
+                font: {
+                  size:10
+                }
+
+              },
+
+             
+              
+            },
+        },
+      }
   });
 </script>
 
