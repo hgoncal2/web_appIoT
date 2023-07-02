@@ -33,16 +33,16 @@
 
 
 
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 
+
 <script>
 
-  const ctx = document.getElementById('myChart');
+  var ctx = document.getElementById('myChart');
   console.log("entrei")
   new Chart(ctx, {
     type: 'line',
@@ -63,7 +63,7 @@
        elements:{
                 point:{
                     borderWidth: 0,
-                    radius: 0.5,
+                    radius: 1,
                     backgroundColor: 'rgba(0,0,0,0)'
                 }
             },
@@ -117,7 +117,7 @@
       }
   });
 
-  const ctx2 = document.getElementById('myChart2');
+  var ctx2 = document.getElementById('myChart2');
 
   new Chart(ctx2, {
     type: 'line',
