@@ -75,10 +75,10 @@ def back():
 def default():
 	global val
 	val=""
-	return redirect(url_for('index'))
+	return redirect(url_for('dashboard'))
 
 @app.route("/dashboard")
-def index():
+def dashboard():
 	global val
 	val=""
 	cnx = mysql.connector.connect(user='root', password='hugo2023',
@@ -125,13 +125,15 @@ def index():
 		lista_d_t.reverse()
 		lista_d_h.reverse()
 		lista_v_h.reverse()
-	return render_template("sidebar.html",data_v_t=json.dumps(lista_v_t),data_d_t=lista_d_t,data_v_h=json.dumps(lista_v_h),data_d_h=lista_d_h,val=val)
+	return render_template("base.html",data_v_t=json.dumps(lista_v_t),data_d_t=lista_d_t,data_v_h=json.dumps(lista_v_h),data_d_h=lista_d_h,val=val)
 
 
 
 
     
-    
+@app.route('/favicon.ico')
+def favicon():
+    return url_for('static', filename='favicon.ico')
 
 
 @app.errorhandler(404)
