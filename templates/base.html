@@ -16,6 +16,11 @@
 
     
 };
+.container2 {
+   position: absolute;
+   text-align: center;
+
+};
 
 
 
@@ -109,15 +114,18 @@
             {%endblock%}
 
            {% if pag == 'dash' %}
+           <div>
              {% with %}
                   {% set lista_d_t,lista_v_t,lista_d_h,lista_v_h=data_d_t,data_v_t,data_d_h,data_v_h%}
                   {% include "dashboard.html" %}
                   
               {% endwith %}
               <br>
-                  
+                  <div>
              
              {%endif%}
+
+
 
            
             

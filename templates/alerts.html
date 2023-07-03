@@ -23,21 +23,27 @@
     </style>
 <div id="load" class="blink alert-fixed">
   {{load1|safe}}
+ 
   
   </div>
-
+   <input type="hidden" id="custId" value={{flag}}></input>
   <script type="text/javascript">
-    
-    
+    window.onload = function() {
+      setTimeout(myFunc, 5000);
+    }
+    $("#custId").change(myFunc)
   var x = document.getElementById("load");
 
-  $("#load").on("click",function(){
+var myFunc= function(){
   if (x.style.display === "none") {
     x.style.display = "block";
   } else {
     x.style.display = "none";
   }
-})
+}
+  $("#load").on("click",myFunc)
   </script>
+
+  
 
   

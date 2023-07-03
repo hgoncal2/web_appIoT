@@ -5,14 +5,52 @@
     display: flex  ;     
 }
 .container {
-   position: absolute;
+   
    text-align: center;
 
 }
 
 
 </style>
+<div class="d-flex justify-content-around row" >
+  <div class="container2" style="width: 15%;text-align: left;" >
+  <div class="card row">
+    <div class="card-header text-white" style="background-color: #00AA9E;">
+      Temperatura
+    </div>
+    <div class="card-body">
+      <h4 class="card-title">{{ ultimo_valor_t}}°C<img class="" src="../static/thermometer.png" alt="Card image" width="40%" style="float: right;"></h4>
+      
+    </div>
+  </div>
+</div>
+<div class="container2" style="width: 15%;text-align: left;" >
+  <div class="card row">
+    <div class="card-header text-white" style="background-color: #00AA9E;">
+      Humidade
+    </div>
+    <div class="card-body">
+      <h4 class="card-title">{{ ultimo_valor_h}}%<img class="" src="../static/humidade.png" alt="Card image" width="40%" style="float: right"></h4>
+      
+    </div>
+  </div>
+</div>
+<div class="container2" style="width: 15%;text-align: left;" >
+  <div class="card row">
+    <div class="card-header text-white" style="background-color: #00AA9E;">
+      Último Movimento
+    </div>
+    <div class="card-body">
+      <h4 class="card-title"><p style="font-size: 18px;float: left;max-width: 100px">{{ ultimo_mov }}</p><img class="" src="../static/movimento.png" alt="Card image" width="40%" style="float: right;"></h4>
+      
+    </div>
+  </div>
+</div>
+</div>
 
+  
+<br>
+<br>
 <div style="width: 100%;" class="row flex-nowrap">
 	<div style="width: 50%;">
   <canvas style="" id="myChart"></canvas>
@@ -22,6 +60,7 @@
   <div style="width: 50%;">
   <canvas style="" id="myChart2"></canvas>
 </div>
+
 </div>
 <div class="container" > 
     <form >
@@ -32,6 +71,8 @@
 
 </form>
 </div>
+
+
 
 
 
@@ -49,10 +90,10 @@
   new Chart(ctx, {
     type: 'line',
     data: {
-      labels: {{data_d_t|tojson}},
+      labels: {{lista_d_t|safe}},
       datasets: [{
         label: 'Temperatura °C',
-        data: {{data_v_t}},
+        data: {{lista_v_t}},
         borderWidth: 1,
        
         borderColor: 'rgb(75, 192, 192)',
@@ -124,10 +165,10 @@
   new Chart(ctx2, {
     type: 'line',
     data: {
-      labels: {{data_d_h|tojson}},
+      labels: {{lista_d_h|tojson}},
       datasets: [{
         label: ' Humidade °C',
-        data: {{data_v_h}},
+        data: {{lista_v_h}},
         borderWidth: 1,
         borderColor: 'rgb(75, 192, 192)',
       }]

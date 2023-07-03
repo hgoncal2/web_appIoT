@@ -15,7 +15,9 @@ import socket
 import threading
 from markupsafe import Markup
 from turbo_flask import Turbo
+import random
 from flask_socketio import SocketIO,emit
+from datetime import datetime
 
 
 
@@ -28,7 +30,7 @@ app=Flask(__name__)
 socketio = SocketIO(app)
 turbo = Turbo(app)
 val=""
-
+timer=None
 here = os.path.dirname(os.path.abspath(__file__))
 @app.context_processor
 def inject_load():
@@ -40,31 +42,39 @@ def printit():
   		val=""
   		inject_load()
   		turbo.push(turbo.replace(render_template("alerts.html"), 'load'))
-  		global t
-  		t.cancel()
-  		t=threading.Timer(10.0, printit)
-  		global flag_t
-  		flag_t=1
+  		
+  		
+  		
   	
-t=threading.Timer(5.0, printit)
-flag_t=1
 
-@app.route("/backend")
+
+
 def back():
-	if request.args.get('q') == "move":
-		with app.app_context():
-			global val
-			val='<div class="alert alert-warning alert-dismissible text-center " role="alert"><strong>Movimento Detectado!</strong></div>'
-			inject_load()
-			print("entrei")
-			turbo.push(turbo.replace(render_template("alerts.html"), 'load'))
-			global flag_t
-			if(flag_t==1):
-				flag_t=0
-				t.start()
-			return '', 204
-	else:
-		return render_template("404.html")
+	
+	with app.app_context():
+		global val
+		
+		global timer
+		val='<div class="alert alert-warning alert-dismissible text-center " role="alert"><strong>Movimento Detectado!</strong></div>'
+		inject_load()
+		print("entrei")
+		turbo.push(turbo.replace(render_template("alerts.html"),'load'))
+		timer = threading.Timer(5, remove)
+		timer.start()
+		
+		
+		
+def remove():
+	with app.app_context():
+		global timer
+		global val
+		val=""
+		inject_load()
+		print("remove")
+		turbo.push(turbo.replace(render_template("alerts.html"),'load'))
+		timer.cancel()
+			
+	
 			
 		
 		
@@ -73,10 +83,19 @@ def back():
 
 	
 
+# @app.before_request 
+# def before_request_callback():
+# 	global val
+# 	if(val!=""):
+# 		val=""
+# 		inject_load()
+# 		print("entrei33")
+# 		turbo.push(turbo.replace(render_template("alerts.html"), 'load'))
+
 
 @app.route('/')
 def default():
-	emit('t', {'data': 'foobar'})
+	
 	global val
 	val=""
 	return redirect(url_for('dashboard'))
@@ -132,13 +151,36 @@ def dashboard(path=None):
 		lista_d_t.reverse()
 		lista_d_h.reverse()
 		lista_v_h.reverse()
-	return render_template("base.html",data_v_t=json.dumps(lista_v_t),data_d_t=lista_d_t,data_v_h=json.dumps(lista_v_h),data_d_h=lista_d_h,val=val,pag="dash")
+
+	cursor=cnx.cursor()
+	lista_p=[]
+	p="select data from pir"
+	cursor.execute(p)
+	records = cursor.fetchall()
+	for row in records:
+		lista_p.append((row[0]).split(" "))
+	items=[]
+	lista_p.reverse()
+	for i in range(len(lista_p)):
+	    an_it=dict(id=str(i),valor="Ativado",data=str(lista_p[i][0]),hora=str(lista_p[i][1]))
+	    items.append(an_it)
+	
+	tempo_mov=tempoPassado(items[0])
+	print(tempo_mov)
+	return render_template("base.html",data_v_t=json.dumps(lista_v_t),data_d_t=lista_d_t,data_v_h=json.dumps(lista_v_h),data_d_h=lista_d_h,val=val,pag="dash",ultimo_valor_t=lista_v_t[-1],ultimo_valor_h=lista_v_h[-1],ultimo_mov=tempo_mov)
 
 
 
 @app.route('/conf')
 def conf():
-	socketio.emit("t",{'data':'testee'})
+	
+	try:
+		if(request.args.get('conf_led') == "ligar"):
+			socketio.emit("t",{'data':'ligar'})
+		if(request.args.get('conf_led') == "desligar"):
+			socketio.emit("t",{'data':'desligar'})
+	except Exception as e:
+		print(e)
 	return render_template("base.html",pag="conf")
 
 @app.route('/history/<sensor>')
@@ -220,7 +262,28 @@ def history(sensor):
 	return render_template("404.html")
 		
 
+def tempoPassado(dic):
+	datai=datetime.strptime("{} {}".format(dic["data"],dic["hora"]),
+	              '%Y-%m-%d %H:%M:%S')
+	datan= datetime.now()
 
+	d=(datan-datai)
+	days=d.days
+	hours, remainder = divmod(d.seconds, 3600)
+	minutes, seconds = divmod(remainder, 60)
+	if( days > 0):
+		str="{} dia(s), {} horas(s) e {} minuto(s)".format(days,hours,minutes)
+	else:
+	    if(hours>0):
+	        str="{} horas(s), {} minuto(s) e {} segundo(s)".format(hours,minutes,seconds)
+	    else:
+	        if(minutes>0):
+	            str="{} minuto(s) e {} segundo(s)".format(minutes,seconds)
+	        else:
+	            str="{} segundo(s)".format(seconds)
+	
+	return str
+        
 	
 
 	
@@ -237,6 +300,11 @@ def handle_message(data):
     """event listener when client types a message"""
     print("data from the front end: ",str(data))
     emit("data",{'data':data,'id':request.sid},broadcast=True)
+
+@socketio.on('move')
+def on_message(data):
+    print('Movimento')
+    back()
 
 @socketio.on("disconnect")
 def disconnected():
@@ -261,7 +329,7 @@ if __name__ == "__main__":
 	#subprocess.runrunrunrun(['sh', 'mqtt/teste.sh'])
 	
 	
-	socketio.run(app,host='0.0.0.0')
+	socketio.run(app,host='0.0.0.0',debug=True, use_reloader=True, use_debugger=True)
     
    
 
