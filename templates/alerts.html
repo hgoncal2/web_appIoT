@@ -1,0 +1,43 @@
+<style>
+        .blink {
+            animation: blinker 1.5s linear infinite;
+            color: red;
+            font-family: sans-serif;
+        }
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+        .alert-fixed {
+    position:fixed; 
+    top: 0px; 
+    left: 0px; 
+    width: 100%;
+    z-index:9999; 
+    border-radius:0px
+}
+#alerta{
+  text-align: center;
+}
+    </style>
+<div id="load" class="blink alert-fixed">
+  {{load1|safe}}
+  
+  </div>
+
+  <script type="text/javascript">
+    
+    
+  var x = document.getElementById("load");
+
+  $("#load").on("click",function(){
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+})
+  </script>
+
+  

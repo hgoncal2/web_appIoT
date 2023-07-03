@@ -11,13 +11,13 @@
                
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
                     <li class="nav-item">
-                        <a href="{{url_for('index')}}" class="nav-link align-middle px-0">
+                        <a href="{{url_for('dashboard')}}" class="nav-link align-middle px-0">
                             <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span>
                         </a>
                     </li>
                    
                     <li>
-                        <a href="#" class="nav-link px-0 align-middle">
+                        <a href="{{url_for('conf')}}" class="nav-link px-0 align-middle">
                             <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Configurações</span></a>
                     </li>
                     <li>
@@ -67,7 +67,7 @@
             </div>
         </div>
         <div class="col py-3" >
-
+            {{% if pag == "dash" %}}
             {% with %}
                 {% set lista_d_t,lista_v_t,lista_d_h,lista_v_h=data_d_t,data_v_t,data_d_h,data_v_h%}
                 
@@ -75,10 +75,21 @@
                 
             {% endwith %}
             
+            
+            
                 <br>
                 <div>
                 {% include "index2.html" %}
             </div>
+            {{%if pag == "conf" %}}
+
+                {% include "settings.html" %}
+
+            {{%else%}}
+            
+                <p>UIUIAAA</p>
+
+            {{%endif%%}}
     
             
     </div>

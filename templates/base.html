@@ -6,9 +6,17 @@
 <html lang="en">
 <style type="text/css">
   html, body {
+    width: 100%;
     max-width: 100%;
+    margin: 0px;
+    padding: 0px;
+    height: 100%; 
     overflow-x: hidden;
-}
+    min-height: 100%;
+
+    
+};
+
 
 
 </style>
@@ -20,15 +28,21 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
     <title>Hello, world!</title>
   </head>
 
   <body>
+    
+    
+      
   	{% include "navbar.html" %}
+    {% include "alerts.html" %}
   	
   	
   	<div class="container-fluid">
+
+      
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
@@ -46,30 +60,24 @@
                     </li>
                    
                     <li>
-                        <a href="#" class="nav-link px-0 align-middle">
+                        <a href="{{url_for('conf')}}" class="nav-link px-0 align-middle">
                             <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Configurações</span></a>
                     </li>
+                    
                     <li>
-                        <a href="#submenu2" data-bs-toggle="collapse" class="nav-link px-0 align-middle ">
-                            <i class="fs-4 bi-bootstrap"></i> <span class="ms-1 d-none d-sm-inline">Historial de valores</span></a>
-                        
-                    </li>
-                    <li>
-                        <a href="#submenu3" data-bs-toggle="collapse" class="nav-link px-0 align-middle">
-                            <i class="fs-4 bi-grid"></i> <span class="ms-1 d-none d-sm-inline">Products</span> </a>
+                        <a   class="cl  px-0 align-middle"style="cursor: pointer;user-select: none;border: none;outline: none; text-decoration: none;" >
+                            <i class="fs-4 bi-grid"></i> <span class=" ms-1 d-none d-sm-inline">Histórico de Sensores</span> </a>
                             <ul class="collapse nav flex-column ms-1" id="submenu3" data-bs-parent="#menu">
                             <li class="w-100">
-                                <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline">Product</span> 1</a>
+                                <a href="{{ url_for('history', sensor='temp') }}" class="nav-link px-0"> <span class="d-none d-sm-inline">Temperatura</span></a>
                             </li>
                             <li>
-                                <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline">Product</span> 2</a>
+                                <a href="{{ url_for('history', sensor='humid') }}" class="nav-link px-0"> <span class="d-none d-sm-inline">Humidade</span></a>
                             </li>
                             <li>
-                                <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline">Product</span> 3</a>
+                                <a href="{{ url_for('history', sensor='pir') }}" class="nav-link px-0"> <span class="d-none d-sm-inline">Movimento</span></a>
                             </li>
-                            <li>
-                                <a href="#" class="nav-link px-0"> <span class="d-none d-sm-inline">Product</span> 4</a>
-                            </li>
+                           
                         </ul>
                     </li>
                     <li>
@@ -96,16 +104,42 @@
             </div>
         </div>
         <div class="col py-3" >
-           {% with %}
-                {% set lista_d_t,lista_v_t,lista_d_h,lista_v_h=data_d_t,data_v_t,data_d_h,data_v_h%}
-                {% include "dashboard.html" %}
-                
-            {% endwith %}
-            <br>
-                <div>
-                {% include "index2.html" %}
+            {%block content%}
+
+            {%endblock%}
+
+           {% if pag == 'dash' %}
+             {% with %}
+                  {% set lista_d_t,lista_v_t,lista_d_h,lista_v_h=data_d_t,data_v_t,data_d_h,data_v_h%}
+                  {% include "dashboard.html" %}
+                  
+              {% endwith %}
+              <br>
+                  
+             
+             {%endif%}
+
            
-            </div>
+            
+            {%if pag == "conf" %}
+
+              {% include "settings.html" %}
+                {%endif%}
+
+             {%if pag == "history" %}
+             {% with %}
+                  {% set items=items %}
+                  {% include "history.html" %}
+              {% endwith %}
+                {%endif%}
+                
+
+            
+           
+           
+           
+
+
 </div>
     <!-- Optional JavaScript; choose one of the two! -->
 
@@ -116,7 +150,23 @@
 <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script type="text/javascript">
+  
+  var coll = document.getElementsByClassName("cl");
+var i;
 
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
 
     <!-- Option 2: Separate Popper and Bootstrap JS -->
     <!--
