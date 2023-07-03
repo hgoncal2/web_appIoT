@@ -15,6 +15,7 @@ import socket
 import threading
 from markupsafe import Markup
 from turbo_flask import Turbo
+from flask_socketio import SocketIO,emit
 
 
 
@@ -24,6 +25,7 @@ ca_crt = os.path.join(here, 'mqtt/ca.crt')
 client_crt = os.path.join(here, 'mqtt/client.crt')
 client_key = os.path.join(here, 'mqtt/client.key')
 app=Flask(__name__)
+socketio = SocketIO(app)
 turbo = Turbo(app)
 val=""
 
@@ -74,6 +76,7 @@ def back():
 
 @app.route('/')
 def default():
+	emit('t', {'data': 'foobar'})
 	global val
 	val=""
 	return redirect(url_for('dashboard'))
@@ -135,6 +138,7 @@ def dashboard(path=None):
 
 @app.route('/conf')
 def conf():
+	socketio.emit("t",{'data':'testee'})
 	return render_template("base.html",pag="conf")
 
 @app.route('/history/<sensor>')
@@ -221,10 +225,24 @@ def history(sensor):
 
 	
 
-	
-	
+@socketio.on("connect")
+def connected():
+    """event listener when client connects to the server"""
+    print(request.sid)
+    print("client has connected")
+    emit("connect")
 
+@socketio.on('data')
+def handle_message(data):
+    """event listener when client types a message"""
+    print("data from the front end: ",str(data))
+    emit("data",{'data':data,'id':request.sid},broadcast=True)
 
+@socketio.on("disconnect")
+def disconnected():
+    """event listener when client disconnects to the server"""
+    print("user disconnected")
+    emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
 @app.route('/favicon.ico')
 def favicon():
     return url_for('static', filename='favicon.ico')
@@ -243,7 +261,7 @@ if __name__ == "__main__":
 	#subprocess.runrunrunrun(['sh', 'mqtt/teste.sh'])
 	
 	
-	app.run(host="0.0.0.0", debug=True,threaded=True)
+	socketio.run(app,host='0.0.0.0')
     
    
 
