@@ -18,6 +18,8 @@ from turbo_flask import Turbo
 import random
 from flask_socketio import SocketIO,emit
 from datetime import datetime
+from flask_wtf import FlaskForm
+from wtforms import StringField,SubmitField
 
 
 
@@ -29,12 +31,15 @@ client_key = os.path.join(here, 'mqtt/client.key')
 app=Flask(__name__)
 socketio = SocketIO(app)
 turbo = Turbo(app)
+app.config['SECRET_KEY']="randomstringetal"
 val=""
+led='0'
 timer=None
+status=None
 here = os.path.dirname(os.path.abspath(__file__))
 @app.context_processor
 def inject_load():
-	return {'load1': val}
+	return {'load1': val,'led_estado':led}
 
 def printit():
   	with app.app_context():
@@ -59,6 +64,7 @@ def back():
 		inject_load()
 		print("entrei")
 		turbo.push(turbo.replace(render_template("alerts.html"),'load'))
+		#turbo.push(turbo.replace("Agora!",'agora'))
 		timer = threading.Timer(5, remove)
 		timer.start()
 		
@@ -169,19 +175,38 @@ def dashboard(path=None):
 	print(tempo_mov)
 	return render_template("base.html",data_v_t=json.dumps(lista_v_t),data_d_t=lista_d_t,data_v_h=json.dumps(lista_v_h),data_d_h=lista_d_h,val=val,pag="dash",ultimo_valor_t=lista_v_t[-1],ultimo_valor_h=lista_v_h[-1],ultimo_mov=tempo_mov)
 
+@app.route
 
-
-@app.route('/conf')
+@app.route('/conf' , methods=['GET','POST'])
 def conf():
 	
+
 	try:
+		
 		if(request.args.get('conf_led') == "ligar"):
-			socketio.emit("t",{'data':'ligar'})
+			socketio.emit("led",{'data':'ligar'})
+			return redirect(url_for('conf_led'))
+			
+			
 		if(request.args.get('conf_led') == "desligar"):
-			socketio.emit("t",{'data':'desligar'})
+			socketio.emit("led",{'data':'desligar'})
+			return redirect(url_for('conf_led'))
+
+
+			
+
 	except Exception as e:
 		print(e)
-	return render_template("base.html",pag="conf")
+	try:
+		getEstado()
+		return render_template("base.html",pag="conf",teste="")
+	except Exception as e:
+		print(e)
+		return "Erro!"
+@app.route('/conf/leds')
+def conf_led():
+	return redirect(url_for('conf'))
+
 
 @app.route('/history/<sensor>')
 def history(sensor):
@@ -261,6 +286,9 @@ def history(sensor):
 
 	return render_template("404.html")
 		
+def getEstado():
+	socketio.emit("status",{'data':'get'})
+
 
 def tempoPassado(dic):
 	datai=datetime.strptime("{} {}".format(dic["data"],dic["hora"]),
@@ -271,6 +299,7 @@ def tempoPassado(dic):
 	days=d.days
 	hours, remainder = divmod(d.seconds, 3600)
 	minutes, seconds = divmod(remainder, 60)
+	print(days,hours,minutes)
 	if( days > 0):
 		str="{} dia(s), {} horas(s) e {} minuto(s)".format(days,hours,minutes)
 	else:
@@ -286,7 +315,7 @@ def tempoPassado(dic):
         
 	
 
-	
+
 
 @socketio.on("connect")
 def connected():
@@ -305,6 +334,15 @@ def handle_message(data):
 def on_message(data):
     print('Movimento')
     back()
+
+@socketio.on('status')
+def on_message(data):
+	print("recebi status",data["led"])
+	global led
+	led=data["led"]
+	inject_load()
+	turbo.push(turbo.replace(render_template("leds_teste.html"), 'ledss'))
+    
 
 @socketio.on("disconnect")
 def disconnected():
