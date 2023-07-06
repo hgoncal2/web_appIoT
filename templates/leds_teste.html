@@ -110,20 +110,16 @@
 }
 
 </style>
-
-<div class="led">
-    {% if led_estado == '1' %}
-    <div class="led-box">
-    <div class="led-green"></div>
-    <p>Ligado</p>
+<div class="container" > 
+    <form >
+    <input type="submit" name="conf_led" value="desligar" style="height: 28px;">
+    <input type="submit" name="conf_led" value="ligar" style="height: 28px;">
+    
   </div>
-  {%endif%}
+</form>
 
-{%if led_estado == '0' %}
-    <div class="led-box">
-    <div class="led-red"></div>
-    <p>Desligado</p>
-  </div>
-{%endif%}
+</div>
+<div id="ledss">
+{%include 'leds.html'%}
 </div>
 

@@ -2,7 +2,7 @@ from flask import Flask,render_template,request,redirect,url_for,flash
 import subprocess
 import sys
 from threading import Thread
-import paho.mqtt.client as mqtt #import the client1
+
 import time
 from mqtt.settings import password,user
 import ssl
@@ -20,6 +20,10 @@ from flask_socketio import SocketIO,emit
 from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField,SubmitField
+from tenacity import wait_exponential, retry, stop_after_attempt
+from jinja2 import Environment
+from flask_sqlalchemy import SQLAlchemy
+
 
 
 
@@ -36,7 +40,9 @@ val=""
 led='0'
 timer=None
 status=None
-here = os.path.dirname(os.path.abspath(__file__))
+
+
+
 @app.context_processor
 def inject_load():
 	return {'load1': val,'led_estado':led}
@@ -50,7 +56,7 @@ def printit():
   		
   		
   		
-  	
+
 
 
 
@@ -99,23 +105,21 @@ def remove():
 # 		turbo.push(turbo.replace(render_template("alerts.html"), 'load'))
 
 
+
+
+
 @app.route('/')
 def default():
-	
-	global val
-	val=""
-	return redirect(url_for('dashboard'))
-
-
-
-@app.route("/dashboard/")
-@app.route("/dashboard/<path:path>")
-def dashboard(path=None):
-	global val
-	val=""
+	return redirect(url_for("dashboard"))
+@app.route("/dashboard")
+def dashboard():
 	cnx = mysql.connector.connect(user='root', password='hugo2023',
-                              host='127.0.0.1',port='3306',
-                              database='iot')
+	                              host='127.0.0.1',port='3306',
+	                              database='iot')
+	print("entrei")
+	global val
+	val=""
+	 
 	cursor=cnx.cursor() 
 	lista_v_t=[]
 	lista_d_t=[]
@@ -170,17 +174,42 @@ def dashboard(path=None):
 	for i in range(len(lista_p)):
 	    an_it=dict(id=str(i),valor="Ativado",data=str(lista_p[i][0]),hora=str(lista_p[i][1]))
 	    items.append(an_it)
-	
-	tempo_mov=tempoPassado(items[0])
+	try:
+		tempo_mov=tempoPassado(items[0])
+	except Exception as e:
+		tempo_mov="Erro!"
+		print("Erro!", e)
 	print(tempo_mov)
+	cnx.close()
 	return render_template("base.html",data_v_t=json.dumps(lista_v_t),data_d_t=lista_d_t,data_v_h=json.dumps(lista_v_h),data_d_h=lista_d_h,val=val,pag="dash",ultimo_valor_t=lista_v_t[-1],ultimo_valor_h=lista_v_h[-1],ultimo_mov=tempo_mov)
 
-@app.route
+@app.route("/backend" , methods=['GET','POST'])
+def backend():
 
-@app.route('/conf' , methods=['GET','POST'])
-def conf():
+	return redirect(url_for("conf",path="alertas"))
+			
 	
 
+@app.route('/conf/<path>/' , methods=['GET','POST'])
+def conf(path):
+
+	cnx = mysql.connector.connect(user='root', password='hugo2023',
+	                              host='127.0.0.1',port='3306',
+	                              database='iot')
+	cursor=cnx.cursor()
+	if(path=="alertas"):
+		t="select temp,maxTemp,minTemp,humid,maxHumid,minHumid,pir from alertas;";
+		cursor.execute(t);
+		records=cursor.fetchall();
+		try:
+
+			temp,maxTemp,minTemp,humid,maxHumid,minHumid,pir=records[0]
+			print(temp,maxTemp,minTemp,humid,maxHumid,minHumid,pir)
+			return render_template("base.html",pag="alertas",temp=str(temp),minTemp=str(minTemp),maxTemp=str(maxTemp),humid=str(humid),maxHumid=str(maxHumid),minHumid=str(minHumid),pir=str(pir))
+		except Exception as e:
+			temp,humid,pir=str(0),str(0),str(0);
+			maxTemp,minTemp,maxHumid,minHumid="NULL","NULL","NULL","NULL"
+			return render_template("base.html",pag="alertas",temp=str(temp),minTemp=str(minTemp),maxTemp=str(maxTemp),humid=str(humid),maxHumid=str(maxHumid),minHumid=str(minHumid),pir=str(pir))
 	try:
 		
 		if(request.args.get('conf_led') == "ligar"):
@@ -199,7 +228,7 @@ def conf():
 		print(e)
 	try:
 		getEstado()
-		return render_template("base.html",pag="conf",teste="")
+		return render_template("base.html",pag="conf",teste="1",maxHum="")
 	except Exception as e:
 		print(e)
 		return "Erro!"
@@ -210,13 +239,13 @@ def conf_led():
 
 @app.route('/history/<sensor>')
 def history(sensor):
-
 	cnx = mysql.connector.connect(user='root', password='hugo2023',
-                              host='127.0.0.1',port='3306',
-                              database='iot')
+	                              host='127.0.0.1',port='3306',
+	                              database='iot')
 	
+	cursor=cnx.cursor() 
 	if(sensor=="temp"):
-		cursor=cnx.cursor() 
+		 
 		lista_v_t=[]
 		lista_d_t=[]
 		t="select data from temp "
@@ -238,13 +267,14 @@ def history(sensor):
 		for i in range(len(lista_v_t)):
 		    an_it=dict(id=str(i),valor=str(lista_v_t[i]) + "°C",data=str(lista_d_t[i][0]),hora=str(lista_d_t[i][1]))
 		    items.append(an_it)
+		cnx.close()
 		return render_template("base.html",pag="history",items=items)
 		
 
 
 
 	if(sensor=="humid"):
-		cursor=cnx.cursor() 
+		
 		lista_v_h=[]
 		lista_d_h=[]
 
@@ -265,10 +295,11 @@ def history(sensor):
 		for i in range(len(lista_v_h)):
 		    an_it=dict(id=str(i),valor=str(lista_v_h[i])+"%",data=str(lista_d_h[i][0]),hora=str(lista_d_h[i][1]))
 		    items.append(an_it)
+		cnx.close()
 		return render_template("base.html",pag="history",items=items)
 
 	if(sensor=="pir"):
-		cursor=cnx.cursor()
+		
 		lista_p=[]
 		p="select data from pir"
 		cursor.execute(p)
@@ -280,6 +311,7 @@ def history(sensor):
 		for i in range(len(lista_p)):
 		    an_it=dict(id=str(i),valor="Ativado",data=str(lista_p[i][0]),hora=str(lista_p[i][1]))
 		    items.append(an_it)
+		cnx.close()
 		return render_template("base.html",pag="history",items=items)
 	
 	
@@ -288,6 +320,8 @@ def history(sensor):
 		
 def getEstado():
 	socketio.emit("status",{'data':'get'})
+	##usar sleep para pagina dos leds
+	#time.sleep(1)
 
 
 def tempoPassado(dic):
@@ -314,7 +348,49 @@ def tempoPassado(dic):
 	return str
         
 	
+@app.route('/receivedata', methods=['POST'])
+def receive_data():
+	if((request.form['temp_check']=="1" and request.form['tempMax']=="" and request.form['tempMin']=="")):
+		 flash(render_template("boostrap_notification.html",erro="Temperatura Máxima/Mínima!"))
+		 return redirect(url_for("conf",path="alertas"))
+	else:
+		if((request.form['humid_check']=="1" and request.form['humidMax']=="" and request.form['humidMin']=="")):
+			 flash(render_template("boostrap_notification.html",erro="Humidade Máxima ou Mínima!"))
+			 return redirect(url_for("conf",path="alertas"))
+		else:
 
+			try:
+				cnx = mysql.connector.connect(user='root', password='hugo2023',
+			                              host='127.0.0.1',port='3306',
+			                              database='iot')
+				cursor=cnx.cursor()
+				if(request.form['tempMax']==""):
+					tempMax="NULL"
+				else:
+					tempMax=request.form['tempMax']
+				if(request.form['tempMin']==""):
+					tempMin="NULL"
+				else:
+					tempMin=request.form['tempMin']
+				if(request.form['humidMax']==""):
+					humidMax="NULL"
+				else:
+					humidMax=request.form['humidMax']
+				if(request.form['humidMin']==""):
+					humidMin="NULL"
+				else:
+					humidMin=request.form['humidMin']
+				print(request.form['temp_check'],tempMax,tempMin,request.form['humid_check'],humidMax,humidMin,request.form['pir_check'])
+
+				query="replace into alertas (id,temp,maxTemp,minTemp,humid,maxHumid,minHumid,pir) values (5,{},{},{},{},{},{},{});".format(request.form['temp_check'],tempMax,tempMin,request.form['humid_check'],humidMax,humidMin,request.form['pir_check'])
+				cursor.execute(query)
+				cnx.commit()
+				cnx.close()
+				print(cursor.rowcount, "record inserted.")
+				return redirect(url_for('conf',path="alertas"))
+			except Exception as e:
+				print(e)
+				return "",500
 
 
 @socketio.on("connect")
@@ -341,7 +417,8 @@ def on_message(data):
 	global led
 	led=data["led"]
 	inject_load()
-	turbo.push(turbo.replace(render_template("leds_teste.html"), 'ledss'))
+	turbo.push(turbo.update(render_template("leds.html"), 'ledss'))
+
     
 
 @socketio.on("disconnect")
@@ -367,7 +444,7 @@ if __name__ == "__main__":
 	#subprocess.runrunrunrun(['sh', 'mqtt/teste.sh'])
 	
 	
-	socketio.run(app,host='0.0.0.0',debug=True, use_reloader=True, use_debugger=True)
+	socketio.run(app,host='0.0.0.0',debug=True, use_reloader=True, use_debugger=False)
     
    
 
