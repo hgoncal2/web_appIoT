@@ -1,0 +1,211 @@
+
+
+
+
+<!doctype html>
+<html lang="en">
+<style type="text/css">
+  html, body {
+    
+    width: 100%;
+    max-width: 100%;
+    margin: 0px;
+    padding: 0px;
+    height: 100%; 
+    overflow-x: hidden;
+    min-height: 100%;
+
+
+    
+};
+.container2 {
+   position: absolute;
+   text-align: center;
+
+};
+
+ .d{
+  color:#12cfff;
+ }
+.men{
+  color: #8ebcff;
+}
+
+</style>
+  <head>
+    {{ turbo() }}
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+    
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/2.0.1/chartjs-plugin-zoom.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.4/css/bootstrap5-toggle.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap5-toggle@5.0.4/js/bootstrap5-toggle.jquery.min.js"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+    $('[data-toggle=tooltip]').tooltip();
+}); 
+    </script>
+    <title>Hello, world!</title>
+    
+    
+  </head>
+
+  <body>
+    
+    
+      
+  	{% include "navbar.html" %}
+    {% include "alerts.html" %}
+  	
+  	
+  	<div class="container-fluid" data-turbo="false">
+
+      
+    
+    <div class="row flex-nowrap">
+        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark" id="offcanvas" data-bs-keyboard="false" data-bs-backdrop="false">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+               
+                <ul class="nav flex-column " id="menu">
+                    <li class="nav-item">
+                        <a href="{{url_for('dashboard')}}" class="nav-link align-middle px-0">
+                            <i class="fs-4 bi-house "></i> <span class="ms-1 d-none d-sm-inline men">Dashboard</span>
+                        </a>
+                    </li>
+                   
+                    <li class="nav-item">
+                        <a   class="cl nav-link align-middle px-0 "style="cursor: pointer;user-select: none;border: none;outline: none; text-decoration: none;" >
+                            <i class="fs-4 bi-grid"></i> <span class=" ms-1 d-none d-sm-inline men">Configurações</span> </a>
+                            <ul class="collapse nav flex-column ms-1" id="submenu3" data-bs-parent="#menu">
+                            <li class="w-100">
+                                <a href="{{ url_for('conf',path='alertas') }}" class="nav-link px-0 "> <span class="d-none d-sm-inline" style="color:#3d69c8;">Alertas</span></a>
+                            </li>
+                            <li class="w-100">
+                                <a href="{{ url_for('conf',path='led') }}" class="nav-link px-0 "> <span class="d-none d-sm-inline" style="color:#3d69c8;">Led</span></a>
+                            </li>
+                            
+                        </ul>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a   class="cl  nav-link align-middle px-0"style="cursor: pointer;user-select: none;border: none;outline: none; text-decoration: none;" >
+                            <i class="fs-4 bi-grid"></i> <span class=" ms-1 d-none d-sm-inline men">Histórico de Sensores</span> </a>
+                            <ul class="collapse nav flex-column ms-1" id="submenu3" data-bs-parent="#menu">
+                            <li class="w-100">
+                                <a href="{{ url_for('history', sensor='temp') }}" class="nav-link px-0"> <span class="d-none d-sm-inline"style="color:#3d69c8;">Temperatura</span></a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('history', sensor='humid') }}" class="nav-link px-0"> <span class="d-none d-sm-inline"style="color:#3d69c8;">Humidade</span></a>
+                            </li>
+                            <li>
+                                <a href="{{ url_for('history', sensor='pir') }}" class="nav-link px-0"> <span class="d-none d-sm-inline"style="color:#3d69c8;">Movimento</span></a>
+                            </li>
+                           
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-link px-0 align-middle">
+                            <i class="fs-4 bi-people"></i> <span class="ms-1 d-none d-sm-inline">Customers</span> </a>
+                    </li>
+                </ul>
+                <hr>
+                
+            </div>
+        </div>
+        <div class="col py-3" >
+            {%block content%}
+
+            {%endblock%}
+
+           {% if pag == 'dash' %}
+           <div>
+             {% with %}
+                  {% set lista_d_t,lista_v_t,lista_d_h,lista_v_h=data_d_t,data_v_t,data_d_h,data_v_h%}
+                  {% include "dashboard.html" %}
+                  
+              {% endwith %}
+              <br>
+                  <div>
+             
+             {%endif%}
+
+
+
+           
+            
+            {%if pag == "alertas" %}
+
+              {% include "settings.html" %}
+                {%endif%}
+            {%if pag == "led" %}
+            {%include "leds_teste.html"%}
+            {%endif%}
+
+             {%if pag == "history" %}
+             {% with %}
+                  {% set items=items %}
+                  {% include "history.html" %}
+              {% endwith %}
+                {%endif%}
+                
+
+            
+           
+           
+           
+
+
+</div>
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    
+    
+
+<script type="text/javascript">
+  
+  var coll = document.getElementsByClassName("cl");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+
+var myFunc= function(){
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+
+
+
+</script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>

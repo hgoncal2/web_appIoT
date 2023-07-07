@@ -1,0 +1,60 @@
+<style>
+        .blink {
+            animation: blinker 1.5s linear infinite;
+            color: red;
+            font-family: sans-serif;
+        }
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+        .alert-fixed {
+    position:fixed; 
+    top: 0px; 
+    left: 0px; 
+    width: 100%;
+    z-index:9999; 
+    border-radius:0px
+}
+#alerta{
+  text-align: center;
+}
+    </style>
+    <div class="alert-fixed flashes">
+  {% with messages = get_flashed_messages() %}
+  
+    {% for message in messages %}
+      {{ message|safe }}
+    {% endfor %}
+    </div>
+  
+  {% endwith %}
+  </div>
+
+<div id="load" class="blink alert-fixed">
+  {{load1|safe}}
+ 
+  
+  </div>
+   <input type="hidden" id="custId" value={{flag}}></input>
+  <script type="text/javascript">
+    window.onload = function() {
+      setTimeout(myFunc, 5000);
+    }
+    $("#custId").change(myFunc)
+  var x = document.getElementById("load");
+
+var myFunc= function(){
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+  $("#load").on("click",myFunc)
+  </script>
+
+  
+
+  
