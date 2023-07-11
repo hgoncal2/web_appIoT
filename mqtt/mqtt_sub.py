@@ -8,6 +8,11 @@ import json
 import requests
 import socketio
 from threading import Thread
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
+from email.mime.multipart import MIMEMultipart
+from settings import gmail_pass, gmail_user, host, port
 here = os.path.dirname(os.path.abspath(__file__))
 time.sleep(5)
 ca_crt = os.path.join(here, 'ca.crt')
@@ -18,6 +23,28 @@ cnx = mysql.connector.connect(user='root', password='hugo2023',
                               database='iot')
 cursor=cnx.cursor() 
 sio = socketio.Client()
+
+def send_email(to, subject, body):
+    # create message object
+    message = MIMEMultipart()
+ 
+    # add in header
+    message['From'] = Header(gmail_user)
+    message['To'] = Header(to)
+    message['Subject'] = Header(subject)
+ 
+    # attach message body as MIMEText
+    message.attach(MIMEText(body, 'plain', 'utf-8'))
+   
+    # setup email server
+    server = smtplib.SMTP_SSL(host, port)
+    server.login(gmail_user, gmail_pass)
+ 
+    # send email and quit server
+    server.sendmail(gmail_user, to, message.as_string())
+    server.quit()
+
+
 @sio.on('led')
 def on_message(data):
     print('I received a message33!')
@@ -39,7 +66,7 @@ def on_message(client, userdata, message):
             
             lista=json.loads(msg) #decode json data
             #val,date=msg.split(";")
-            val=lista[1]
+            valor=int(lista[1])
             date_aux=lista[3]
             date="-".join(str(x) for x in date_aux[0:3])
             date+=" "
@@ -51,9 +78,27 @@ def on_message(client, userdata, message):
             if(message.topic=="temp"):
                 print(date[0])
                 sql = "INSERT INTO temp (valor, data) VALUES (%s, %s)"
-                val = (val, date)
+                val = (valor, date)
                 cursor.execute(sql, val)
                 cnx.commit()
+                cursor.execute("select temp,maxTemp,minTemp from alertas")
+                records = cursor.fetchone()
+                ativo,maxTemp,minTemp=records
+                if maxTemp is not None:
+                    if(ativo==1 and valor>maxTemp):
+                        sql = "INSERT INTO alertas_history (reason,temp, data) VALUES (%s, %s, %s)"
+                        val = ("Temperatura maior que {}".format(maxTemp),valor,date)
+                        cursor.execute(sql, val)
+                        cnx.commit()
+                if minTemp is not None:
+                    if(ativo==1 and valor<minTemp):
+                        sql = "INSERT INTO alertas_history (reason,temp, data) VALUES (%s, %s, %s)"
+                        val = ("Temperatura menor que {}".format(minTemp),valor,date)
+                        cursor.execute(sql, val)
+                        cnx.commit()
+
+
+
 
                 #print(cursor.rowcount, "record inserted.")
 
@@ -61,19 +106,39 @@ def on_message(client, userdata, message):
             if(message.topic=="humid"):
                 print(date[0])
                 sql = "INSERT INTO humid (valor, data) VALUES (%s, %s)"
-                val = (val, date)
+                val = (valor, date)
                 cursor.execute(sql, val)
                 cnx.commit()
-
+                cursor.execute("select humid,maxHumid,minHumid from alertas")
+                records = cursor.fetchone()
+                ativo,maxHumid,minHumid=records
+                if maxHumid is not None:
+                    if(ativo==1 and valor>maxHumid):
+                        sql = "INSERT INTO alertas_history (reason,humid, data) VALUES (%s, %s, %s)"
+                        val = ("Humidade maior que {}".format(maxHumid),valor,date)
+                        cursor.execute(sql, val)
+                        cnx.commit()
+                if minHumid is not None:
+                    if(ativo==1 and valor<minHumid):
+                        sql = "INSERT INTO alertas_history (reason,humid, data) VALUES (%s, %s, %s)"
+                        val = ("Humidade menor que {}".format(minHumid),valor,date)
+                        cursor.execute(sql, val)
+                        cnx.commit()
                # print(cursor.rowcount, "record inserted.")
 
             if(message.topic=="pir"):
 
                 sql = "INSERT INTO pir (valor, data) VALUES (%s, %s)"
-                val = (val, date)
+                val = (valor, date)
                 cursor.execute(sql, val)
                 cnx.commit()
-                sio.emit("move",{'data':'on'})
+                cursor.execute("select pir from alertas")
+                records = cursor.fetchone()
+                print(records)
+                ativo=records[0]
+                if(ativo==1):
+                    #send_email("hhugo349@gmail.com","Ativado movimento!", " Movimento ativado!")
+                    sio.emit("move",{'data':'on'})
                 # payload = {'q': 'move'}
                 # try:
                 #     requests.get("http://localhost:5000/backend", params=payload)

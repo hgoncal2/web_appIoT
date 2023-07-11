@@ -57,14 +57,14 @@
 <div style="width: 100%;" class="row flex-nowrap">
 	<div style="width: 50%;">
   <canvas style="" class="myChart" id="myChart"></canvas>
-<button id="reset_zoom">
+<button id="reset_zoomChart1">
     Reset zoom
 </button>
   </div>
 
   <div style="width: 50%;">
   <canvas style="" class="myChart" id="myChart2"></canvas>
-  <button id="reset_zoom2" style="float:right;">
+  <button id="reset_zoomChart2" style="float:right;">
     Reset zoom
 </button>
 </div>
@@ -131,7 +131,7 @@ $('.tool').load(function () {
               enabled: true
             },
             mode: 'xy',
-            onZoomComplete: teste
+            onZoomComplete: OnZoomChart1
 
           }
       },
@@ -169,14 +169,24 @@ $('.tool').load(function () {
       }
   });
 
-  function teste(context) {
+  function OnZoomChart1(context) {
          myChart.options.elements.point.radius=myChart.options.elements.point.radius+0.1;
          myChart.update();
    }
-$('#reset_zoom').click(function(){
+
+   function OnZoomChart2(context) {
+         chartH.options.elements.point.radius=chartH.options.elements.point.radius+0.1;
+         chartH.update();
+   }
+$('#reset_zoomChart1').click(function(){
     myChart.resetZoom();
     myChart.options.elements.point.radius=0.5;
     myChart.update();
+});
+$('#reset_zoomChart2').click(function(){
+    chartH.resetZoom();
+    chartH.options.elements.point.radius=0.5;
+    chartH.update();
 });
   var ctx2 = document.getElementById('myChart2');
 
@@ -213,6 +223,7 @@ $('#reset_zoom').click(function(){
               enabled: true
             },
             mode: 'xy',
+            onZoomComplete: OnZoomChart2
           }
       },
         legend: {

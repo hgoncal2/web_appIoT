@@ -1,0 +1,35 @@
+	<div class="overflow-auto shadow" style="max-height: 92vh;">
+	<table class="table">
+  <thead>
+    <tr>
+      
+      <th scope="col">Razão</th>
+      <th scope="col">Valor</th>
+      <th scope="col">Data</th>
+      <th scope="col">Hora</th>
+    </tr>
+  </thead>
+  <tbody>
+  	
+    {% for item in items %}
+    <tr>
+      
+      {%if item.valor_temp == "None" %}
+      <th scope="row">{{item.reason}}%</th>
+      {%else%}
+      <th scope="row">{{item.reason}}°C</th>
+      {%endif%}
+      
+      {%if item.valor_temp == "None" %}
+      <td>{{item.valor_humid}} %</td>
+      {%else%}
+      <td>{{item.valor_temp}} °C</td>
+      {%endif%}
+      <td>{{item.data}}</td>
+      <td>{{item.hora}}</td>
+    </tr>
+    {% endfor %}
+    
+  </tbody>
+</table>
+</div>
