@@ -1,0 +1,256 @@
+
+
+<style type="text/css">
+	.row{
+    display: flex  ;     
+}
+.container {
+   
+   text-align: center;
+
+}
+
+
+</style>
+<div class="d-flex justify-content-around row" >
+ 
+  <div class="container2" style="width: 15%;text-align: left; ">
+
+  <div class="card row">
+    <div class="card-header text-white" style="background-color: #00AA9E;">
+      Temperatura
+    </div>
+    <div class="card-body">
+      <h4 class="card-title">{{ ultimo_valor_t}}°C<img class="tool" src="{{url_for('static',filename='thermometer.png')}}" data-toggle="tooltip" data-placement="bottom" title="Ver histórico de Temperatura" alt="Card image" width="40%" style="float: right;cursor: pointer;" onclick="location.href='{{ url_for('history', sensor='temp') }}'"></h4>
+      
+    </div>
+  </div>
+  
+</div>
+<div class="container2"  style="width: 15%;text-align: left;   ">
+  <div class="card row">
+    <div class="card-header text-white" style="background-color: #00AA9E;">
+      Humidade
+    </div>
+    <div class="card-body">
+      <h4 class="card-title">{{ ultimo_valor_h}}%<img  class="tool" src="{{url_for('static',filename='humidade.png')}}" alt="Card image" data-toggle="tooltip" data-placement="bottom" title="Ver histórico de humidade" width="40%" style="float: right;cursor: pointer;" onclick="location.href='{{ url_for('history', sensor='humid') }}' "></h4>
+      
+    </div>
+  </div>
+</div>
+<div class="container2" style="width: 15%;text-align: left;" >
+  <div class="card row">
+    <div class="card-header text-white" style="background-color: #00AA9E;">
+      Último Movimento
+    </div>
+    <div class="card-body">
+      <h4 class="card-title"><p id="agora" style="font-size: 18px;float: left;max-width: 100px">{{ ultimo_mov }}</p><img class="tool" data-toggle="tooltip" data-placement="bottom" title="Ver histórico de movimento" src="{{url_for('static',filename='movimento.png')}}" alt="Card image" width="40%" style="float: right;cursor: pointer;" onclick="location.href='{{ url_for('history', sensor='pir') }}'"></h4>
+      
+    </div>
+  </div>
+</div>
+</div>
+
+  
+<br>
+<br>
+<div style="width: 100%;" class="row flex-nowrap">
+	<div style="width: 50%;">
+  <canvas style="" class="myChart" id="myChart"></canvas>
+<button id="reset_zoom">
+    Reset zoom
+</button>
+  </div>
+
+  <div style="width: 50%;">
+  <canvas style="" class="myChart" id="myChart2"></canvas>
+  <button id="reset_zoom2" style="float:right;">
+    Reset zoom
+</button>
+</div>
+
+</div>
+<div class="container" > 
+    <form >
+    <input type="submit" name="valor_graf_t" value="10" style="height: 28px;">
+    <input type="submit" name="valor_graf_t" value="50" style="height: 28px;">
+    <input type="submit" name="valor_graf_t" value="100" style="height: 28px;">
+    <input type="submit" name="valor_graf_t" value="Todos" style="height: 28px;">
+
+</form>
+</div>
+
+
+
+
+
+
+
+
+<script>
+
+$('.tool').load(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+});
+  var ctx = document.getElementById('myChart');
+  console.log("entrei")
+  var myChart=new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{lista_d_t|safe}},
+      datasets: [{
+        label: 'Temperatura °C',
+        data: {{lista_v_t}},
+        borderWidth: 1,
+       
+        borderColor: 'rgb(75, 192, 192)',
+        
+        
+
+      }]
+    },
+    options: {
+       elements:{
+                point:{
+                    borderWidth: 0,
+                    radius: 0.5,
+                    backgroundColor: 'rgba(0,0,0,0)'
+                }
+            },
+      responsive: true,
+      plugins: {
+        zoom: {
+          pan: {
+            enabled: true
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            pinch: {
+              enabled: true
+            },
+            mode: 'xy',
+            onZoomComplete: teste
+
+          }
+      },
+    		legend: {
+    			display:false
+    		},
+    		subtitle: {
+    			display:true,
+    			text:" Temperatura"
+    		}
+    	},
+      scales: {
+            y: {
+              type: 'linear',
+                suggestedMin: 0,
+                suggestedMax: 100,
+                ticks:{
+                  
+
+                }
+            },
+            x: {
+              display:true,
+              ticks: {
+                font: {
+                  size:10
+                }
+
+              },
+
+             
+              
+            },
+        },
+      }
+  });
+
+  function teste(context) {
+         myChart.options.elements.point.radius=myChart.options.elements.point.radius+0.3;
+         myChart.update();
+   }
+$('#reset_zoom').click(function(){
+    myChart.resetZoom();
+    myChart.options.elements.point.radius=0.5;
+    myChart.update();
+});
+  var ctx2 = document.getElementById('myChart2');
+
+  var chartH=new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels: {{lista_d_h|tojson}},
+      datasets: [{
+        label: ' Humidade °C',
+        data: {{lista_v_h}},
+        borderWidth: 1,
+        borderColor: 'rgb(75, 192, 192)',
+      }]
+    },
+   options: {
+       elements:{
+                point:{
+                    borderWidth: 0,
+                    radius: 0.5,
+                    backgroundColor: 'rgba(0,0,0,0)'
+                }
+            },
+      responsive: true,
+      plugins: {
+        zoom: {
+          pan: {
+            enabled: true
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+            },
+            pinch: {
+              enabled: true
+            },
+            mode: 'xy',
+          }
+      },
+        legend: {
+          display:false
+        },
+        subtitle: {
+          display:true,
+          text:" Humidade"
+        }
+      },
+      scales: {
+            y: {
+              type: 'linear',
+                suggestedMin: 0,
+                suggestedMax: 100,
+                ticks:{
+                  
+
+                }
+            },
+            x: {
+              display:true,
+              ticks: {
+                font: {
+                  size:10
+                }
+
+              },
+
+             
+              
+            },
+        },
+      }
+  });
+  $('#reset_zoom2').click(function(){
+    chartH.resetZoom();
+});
+</script>
+
+

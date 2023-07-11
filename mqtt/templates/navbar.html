@@ -1,0 +1,49 @@
+
+<style type="text/css">
+  .btn:focus,
+  .btn:active{
+    box-shadow:none !important;
+    outline:px !important;
+}
+</style>
+<div class="alert-fixed flashes">
+  {% with messages = get_flashed_messages() %}
+  
+    {% for message in messages %}
+      {{ message|safe }}
+    {% endfor %}
+    </div>
+  
+  {% endwith %}
+  </div>
+<nav class="navbar-nav navbar-expand-lg navbar-dark "  style="background-color: #0f3249;">
+  <div class="container-fluid ">
+    
+     
+    <div class=" navbar-collapse" id="navbarSupportedContent">
+
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('dashboard')}}"><img src="{{url_for('static',filename='iot.png')}}" alt="Bootstrap" width="32" height="32">
+</a>
+        </li>
+        
+      </ul>
+      {%if session['username'] %}
+      <ul class="navbar-nav ms-auto ">
+        
+        <li class="nav-item">
+          <a class="nav-link" href="{{url_for('logout')}}">Logout
+</a>
+        </li>
+        
+      </ul> 
+      {%endif%}
+      
+    </div>
+
+
+  </div>
+
+</nav>
