@@ -1,16 +1,9 @@
-
-<style type="text/css">
-  .alertas {
-  position: fixed;
-  top: 0;
-  z-index: 99999;
-  width: 100%;
-  height: 50px;
-}
-</style>
-<div id="top-alert" class="alert alert-danger alert-dismissible fade show alertas" role="alert" >
-  <p style="text-align: center"><strong>Erro!</strong>{{erro|safe}}</p>
+<div class="alert alert-danger alert-dismissible fade show" role="alert" style="height:50px">
+  <p style="text-align: center"><strong>Erro!</strong> Introduza um valor de {{erro}}</p>
     <div data-bs-theme="dark">
-  <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close" style="float:right;"> </button>
-</div> 
+  <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close" style="float:right;">
+</div>
+    
+  </button>
+  
 </div>

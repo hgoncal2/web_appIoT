@@ -21,16 +21,22 @@
   text-align: center;
 }
     </style>
-
-   
+    <div class="alert-fixed flashes">
+  {% with messages = get_flashed_messages() %}
+  
+    {% for message in messages %}
+      {{ message|safe }}
+    {% endfor %}
+    </div>
+  
+  {% endwith %}
+  </div>
 
 <div id="load" class="blink alert-fixed">
-  
-  {{ load1|safe }}
+  {{load1|safe}}
  
   
   </div>
-
    <input type="hidden" id="custId" value={{flag}}></input>
   <script type="text/javascript">
     window.onload = function() {
